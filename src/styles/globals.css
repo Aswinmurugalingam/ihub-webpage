@@ -1,0 +1,154 @@
+/* ─── GLOBAL TOKENS ─── */
+:root {
+  --bg: #0e0c0a;
+  --bg2: #161310;
+  --bg3: #1c1915;
+  --brand: #f58220;
+  --brand2: #ffaa50;
+  --brandglow: rgba(245, 130, 32, 0.35);
+  --fg: #f5f0ea;
+  --fg2: #b0a89e;
+  --fg3: #706860;
+  --border: rgba(245, 130, 32, 0.15);
+  --border2: rgba(245, 130, 32, 0.35);
+  --card: rgba(28, 25, 21, 0.9);
+  --radius: 14px;
+  --font-display: "Archivo Black", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --nav-h: 68px;
+}
+
+/* ─── RESET ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse at top, rgba(245,130,32,.10) 0%, transparent 55%),
+    radial-gradient(ellipse at bottom, rgba(245,130,32,.05) 0%, transparent 60%);
+  background-attachment: fixed;
+}
+
+/* ─── INTERACTION CURSORS ─── */
+a, button, select, [role="button"] { cursor: pointer; }
+input, textarea { cursor: text; }
+#root { min-height: 100vh; }
+main, section { width: 100%; }
+/* Keep the footer below the fold while a lazy page/hero is resolving.
+   This prevents a footer flash on hard refresh or direct page entry. */
+main { min-height: calc(100vh - var(--nav-h)); }
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: .95;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+}
+::selection { background: var(--brand); color: #0e0c0a; }
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; border: none; }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--brand); border-radius: 2px; }
+
+/* ─── UTILITY ─── */
+.brand-grad { background: linear-gradient(135deg, var(--brand), var(--brand2)); }
+.brand-text {
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.container {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-inline: clamp(14px, 2vw, 36px);
+}
+
+/* Fluid desktop canvas: use the monitor width instead of leaving large side gutters. */
+@media (min-width: 1600px) {
+  .container { padding-inline: clamp(24px, 1.8vw, 44px); }
+}
+@media (max-width: 768px) {
+  .container { padding-inline: clamp(14px, 4vw, 22px); }
+}
+@media (max-width: 420px) {
+  .container { padding-inline: 14px; }
+}
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--border2);
+  background: rgba(245,130,32,.1);
+  padding: 5px 14px; border-radius: 99px;
+  font-family: var(--font-mono);
+  font-size: .68rem; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--brand);
+}
+.section-pad { padding: 72px 0; }
+.section-pad-sm { padding: 52px 0; }
+
+/* ─── SECTION HEADER ─── */
+.section-header { text-align: center; margin-bottom: 38px; }
+.section-header h2 { font-size: clamp(2rem, 4.5vw, 3.5rem); margin-top: 14px; }
+.section-header p { max-width: 560px; margin: 16px auto 0; color: var(--fg2); line-height: 1.7; }
+
+/* ─── BUTTONS ─── */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; font-size: .875rem; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: #0e0c0a; border-radius: 4px;
+  transition: transform .2s, box-shadow .2s; cursor: pointer;
+}
+.btn-primary:hover { transform: scale(1.04); box-shadow: 0 16px 40px -10px var(--brandglow); }
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; font-size: .875rem; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase;
+  border: 1px solid var(--border2); background: rgba(245,130,32,.06);
+  color: var(--fg); border-radius: 4px;
+  backdrop-filter: blur(8px);
+  transition: border-color .2s, background .2s; cursor: pointer;
+}
+.btn-secondary:hover { border-color: var(--brand); background: rgba(245,130,32,.12); }
+
+/* ─── SCROLL PROGRESS ─── */
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--brand), var(--brand2));
+  transform-origin: left; z-index: 1000;
+  width: 100%; transform: scaleX(0);
+  transition: transform .05s linear;
+}
+
+/* ─── CARDS ─── */
+.card-3d {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  transition: border-color .3s, transform .45s cubic-bezier(.22,1,.36,1), box-shadow .45s;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.card-3d:hover {
+  border-color: var(--border2);
+  box-shadow: 0 32px 80px -20px var(--brandglow);
+}
+
+/* ─── PREMIUM GLOBAL DETAILS ─── */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;background:linear-gradient(115deg,transparent 0 48%,rgba(255,255,255,.012) 49%,transparent 50%);background-size:180px 180px;opacity:.35}.btn-primary,.btn-secondary{border-radius:10px}.btn-primary{position:relative;overflow:hidden}.btn-primary::after{content:'';position:absolute;inset:-2px;background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.25) 48%,transparent 70%);transform:translateX(-120%);transition:transform .7s ease}.btn-primary:hover::after{transform:translateX(120%)}
+:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+
+@media(max-width:768px){body{padding-bottom:calc(74px + env(safe-area-inset-bottom))}.wa-fab{display:none!important}}
