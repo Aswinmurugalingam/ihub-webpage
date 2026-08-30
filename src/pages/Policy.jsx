@@ -2,8 +2,8 @@ import { Link, useLocation } from 'react-router-dom';
 import styles from './Policy.module.css';
 
 const privacy=[
-  ['Information we collect','When you request a quote, book a repair or schedule pickup, we may collect your name, phone number, email, device details, repair issue, address and preferred appointment time.'],
-  ['How it is used','Information is used to respond to enquiries, coordinate pickup/appointments, provide repair updates, prepare estimates and support the requested service.'],
+  ['Information we collect','When you request a quote, book a repair, schedule pickup or submit a used-phone sale request, we may collect your name, phone number, email, device details, condition information, address, preferred appointment time and device photos you choose to upload.'],
+  ['How it is used','Information is used to respond to enquiries, coordinate pickup/appointments, provide repair updates, review used-phone sale requests, prepare estimates or offers and support the requested service. Uploaded sale-request photos are used to assess the submitted device condition.'],
   ['Device data','Hardware repairs normally do not require access to personal content. If software, data-recovery or testing work requires device access, the scope should be agreed before work begins. Back up important data whenever possible.'],
   ['Sharing and retention','Customer information should only be shared with service providers when needed to provide the requested service, and retained only as needed for service, warranty, accounting or legal requirements.'],
   ['Your choices','You may ask iHub to correct contact information or discuss removal of information that is no longer required, subject to legal or warranty record requirements.'],

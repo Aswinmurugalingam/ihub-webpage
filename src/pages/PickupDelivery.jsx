@@ -1,15 +1,17 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Icon from '../components/ui/Icon';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import Booking from './Booking';
 import styles from './PickupDelivery.module.css';
 
 const steps = [
   ['calendar','Schedule','Choose Free Pickup while booking and select an available pickup window.'],
-  ['truck','We collect','Keep the phone ready. Our team coordinates collection from the provided address.'],
+  ['truck','We collect','Keep the device ready. Our team coordinates collection from the provided address.'],
   ['search','Diagnosis','The device is inspected and the repair cost is confirmed before approved work starts.'],
   ['tool','Repair & test','The approved repair is completed and the important device functions are quality checked.'],
-  ['check','Free return','Once ready, the mobile phone is returned to the confirmed delivery location.'],
+  ['check','Free return','Once ready, the repaired device is returned to the confirmed delivery location.'],
 ];
 
 function DoorstepRouteVisual() {
@@ -63,6 +65,18 @@ function DoorstepRouteVisual() {
 }
 
 export default function PickupDelivery() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash !== '#book-repair') return;
+    const timer = window.setTimeout(() => {
+      document.getElementById('book-repair')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [location.hash]);
+
+  const scrollToBooking = () => document.getElementById('book-repair')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
   return <>
     <section className={styles.hero}>
       <div className={styles.heroAmbient}/>
@@ -70,17 +84,29 @@ export default function PickupDelivery() {
         <div className={styles.heroGrid}>
           <motion.div className={styles.heroCopy} initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:.6}}>
             <span className="tag">Doorstep repair service</span>
-            <h1>Free mobile <span className="brand-text">pickup & delivery</span></h1>
-            <p>For eligible iPhone and Android phone repairs in Nagercoil service areas. We collect your phone, repair it at iHub, quality-check it and arrange return delivery.</p>
+            <h1>Free <span className="brand-text">pickup & delivery</span></h1>
+            <p>For eligible iPhone, Android, MacBook, Windows laptop and iPad/Tablet repairs in supported Nagercoil service areas. We collect your device, repair it at iHub, quality-check it and arrange return delivery.</p>
             <div className={styles.actions}>
-              <Link to="/booking?method=pickup" className="btn-primary brand-grad">Schedule Free Pickup</Link>
+              <button type="button" onClick={scrollToBooking} className="btn-primary brand-grad">Start Free Pickup Booking</button>
               <a href="https://wa.me/919025790266?text=Hi%2C%20I%20want%20to%20check%20free%20mobile%20pickup%20availability%20in%20my%20area" target="_blank" rel="noopener" className="btn-secondary">Check My Area</a>
             </div>
-            <div className={styles.note}><Icon name="shield" size={18}/> Pickup availability is confirmed against the address and service area before collection.</div>
+            <div className={styles.note}><Icon name="shield" size={18}/> Pickup availability for phones, MacBooks, laptops and tablets is confirmed against the address and service area before collection.</div>
           </motion.div>
           <DoorstepRouteVisual/>
         </div>
       </div>
+    </section>
+
+
+    <section className={styles.bookingEmbed}>
+      <div className="container">
+        <div className={styles.bookingIntro}>
+          <span className="tag">Book repair</span>
+          <h2>Select your device and <span className="brand-text">schedule pickup</span></h2>
+          <p>All supported device types below can now continue through the same pickup, repair, time-slot and customer-details flow.</p>
+        </div>
+      </div>
+      <Booking embedded defaultMethod="pickup" />
     </section>
 
     <section className={styles.process}>
@@ -95,8 +121,8 @@ export default function PickupDelivery() {
     <section className={styles.coverage}>
       <div className="container">
         <div className={styles.coverageBox}>
-          <div><span className="tag">Mobile phones</span><h2>Built for convenient <span className="brand-text">phone repair</span></h2><p>Free pickup and delivery is currently presented for mobile phones. Laptop/tablet transport can be confirmed separately with the store depending on device size and area.</p></div>
-          <div className={styles.coverageActions}><Link to="/booking?method=pickup" className="btn-primary brand-grad">Book Pickup</Link><a href="https://wa.me/919025790266?text=Hi%2C%20I%20want%20to%20check%20free%20mobile%20pickup%20availability%20in%20my%20area" target="_blank" rel="noopener" className="btn-secondary">Check My Area</a></div>
+          <div><span className="tag">Supported devices</span><h2>One pickup flow for <span className="brand-text">all supported devices</span></h2><p>Free pickup and return delivery can now be requested for iPhone, Android phone, MacBook, Windows laptop and iPad/Tablet repairs, subject to supported area and booking confirmation.</p></div>
+          <div className={styles.coverageActions}><button type="button" onClick={scrollToBooking} className="btn-primary brand-grad">Book Pickup</button><a href="https://wa.me/919025790266?text=Hi%2C%20I%20want%20to%20check%20free%20mobile%20pickup%20availability%20in%20my%20area" target="_blank" rel="noopener" className="btn-secondary">Check My Area</a></div>
         </div>
       </div>
     </section>

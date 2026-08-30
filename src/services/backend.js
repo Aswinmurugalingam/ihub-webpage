@@ -68,3 +68,91 @@ export async function createEnquiry(payload) {
   const items = localRead('ihub_enquiries'); items.push(row); localWrite('ihub_enquiries', items);
   return row;
 }
+
+function safeFileName(name = 'photo.jpg') {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '') || 'photo.jpg';
+}
+
+async function uploadSellPhoto(reference, slot, file) {
+  if (!backendReady || !file) return file?.name ? `preview:${file.name}` : '';
+  const original = safeFileName(file.name || `${slot}.jpg`);
+  const ext = original.includes('.') ? original.split('.').pop() : 'jpg';
+  const path = `${reference}/${slot}.${ext}`;
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/sell-phone-photos/${encodeURI(path)}`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': file.type || 'image/jpeg',
+      'x-upsert': 'false',
+    },
+    body: file,
+  });
+  if (!res.ok) throw new Error(await res.text() || 'Could not upload device photos');
+  return path;
+}
+
+export async function createSellRequest(payload, photoEntries = [], onProgress = () => {}) {
+  const reference = payload.reference || makeReference('IH-SELL');
+  const photoPaths = [];
+  const validPhotos = photoEntries.filter(entry => entry?.file);
+  const totalPhotos = validPhotos.length;
+
+  onProgress({ percent: 12, phaseLabel: 'Preparing', message: 'Preparing your request and phone photos…' });
+
+  for (let index = 0; index < validPhotos.length; index += 1) {
+    const entry = validPhotos[index];
+    const beforePercent = 15 + Math.round((index / Math.max(1, totalPhotos)) * 55);
+    onProgress({
+      percent: beforePercent,
+      phaseLabel: 'Uploading photos',
+      message: `Uploading photo ${index + 1} of ${totalPhotos}…`,
+      current: index + 1,
+      total: totalPhotos,
+    });
+    const path = await uploadSellPhoto(reference, entry.slot || `photo-${photoPaths.length + 1}`, entry.file);
+    if (path) photoPaths.push(path);
+    const afterPercent = 15 + Math.round(((index + 1) / Math.max(1, totalPhotos)) * 55);
+    onProgress({
+      percent: afterPercent,
+      phaseLabel: 'Uploading photos',
+      message: `Uploaded ${index + 1} of ${totalPhotos} phone photos`,
+      current: index + 1,
+      total: totalPhotos,
+    });
+  }
+
+  onProgress({ percent: 78, phaseLabel: 'Saving request', message: 'Saving your phone and contact details…' });
+
+  const row = {
+    ...payload,
+    reference,
+    photo_paths: photoPaths,
+    status: 'new',
+    created_at: new Date().toISOString(),
+  };
+
+  if (backendReady) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/ihub_sell_requests`, {
+      method: 'POST',
+      headers: headers('return=minimal'),
+      body: JSON.stringify(row),
+    });
+    if (!res.ok) throw new Error(await res.text() || 'Sell request could not be submitted');
+    onProgress({ percent: 96, phaseLabel: 'Finalising', message: 'Finalising your Sell Phone request…' });
+    return row;
+  }
+
+  const items = localRead('ihub_sell_requests');
+  items.push({
+    ...row,
+    photo_paths: photoEntries.filter(x => x?.file).map(x => `preview:${x.slot}:${x.file.name}`),
+  });
+  localWrite('ihub_sell_requests', items);
+  onProgress({ percent: 96, phaseLabel: 'Finalising', message: 'Finalising your Sell Phone request…' });
+  return row;
+}

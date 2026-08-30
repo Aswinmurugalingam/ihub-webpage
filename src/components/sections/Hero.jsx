@@ -11,7 +11,7 @@ import styles from './Hero.module.css';
 
 const proof = [
   ['search', 'Diagnosis first'],
-  ['truck', 'Free mobile pickup'],
+  ['truck', 'Free device pickup'],
   ['tool', 'Multi-brand repair'],
   ['check', 'Quality checked'],
 ];
@@ -212,7 +212,7 @@ export default function Hero() {
               transition={{ duration: 0.65, delay: 0.3 }}
             >
               iPhone, Android, MacBook, laptop and tablet repair with clear diagnosis,
-              transparent approval and convenient mobile-phone pickup & return delivery in
+              transparent approval and convenient pickup & return delivery for supported devices in
               eligible Nagercoil areas.
             </motion.p>
 
@@ -235,7 +235,7 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.5 }}
             >
-              <Link to="/booking?method=pickup" className="btn-primary brand-grad">
+              <Link to="/pickup-delivery#book-repair" className="btn-primary brand-grad">
                 <Icon name="truck" size={17} />
                 Schedule Free Pickup
               </Link>

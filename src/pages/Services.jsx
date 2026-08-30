@@ -96,7 +96,7 @@ export default function Services(){return <>
           <h1>One lab for <span className="brand-text">every repair.</span></h1>
           <p>From cracked displays and worn batteries to liquid damage, data recovery and board-level faults — choose a service and see the full repair details instantly without leaving this page.</p>
           <div className={styles.heroActions}>
-            <Link to="/booking" className="btn-primary brand-grad">Book Repair</Link>
+            <Link to="/pickup-delivery#book-repair" className="btn-primary brand-grad">Book Repair</Link>
             <Link to="/pickup-delivery" className="btn-secondary">Free Mobile Pickup</Link>
           </div>
           <div className={styles.heroProof}>
@@ -111,5 +111,5 @@ export default function Services(){return <>
   </section>
 
   <section className={styles.serviceListSec}><div className="container"><ScrollReveal><div className="section-header"><span className="tag">Choose a category</span><h2 style={{marginTop:14}}>Explore the <span className="brand-text">repair lab</span></h2><p>Tap any service card to open its complete repair details here. No separate service page is required.</p></div></ScrollReveal><ServicesGrid/></div></section>
-  <section className={styles.ctaSec}><div className="container"><CtaBanner title={<>Need your phone collected? <span className="brand-text">We come to you.</span></>} sub="Free pickup and return delivery is available for eligible mobile-phone repairs in supported Nagercoil areas." btn1Text="Schedule Free Pickup" btn1Link="/booking?method=pickup" btn2Text="WhatsApp iHub" btn2Link="https://wa.me/919025790266?text=Hi%2C%20I%20need%20help%20choosing%20a%20repair%20service"/></div></section>
+  <section className={styles.ctaSec}><div className="container"><CtaBanner title={<>Need your phone collected? <span className="brand-text">We come to you.</span></>} sub="Free pickup and return delivery is available for eligible phones, MacBooks, Windows laptops and tablets in supported Nagercoil areas." btn1Text="Schedule Free Pickup" btn1Link="/pickup-delivery#book-repair" btn2Text="WhatsApp iHub" btn2Link="https://wa.me/919025790266?text=Hi%2C%20I%20need%20help%20choosing%20a%20repair%20service"/></div></section>
 </>}

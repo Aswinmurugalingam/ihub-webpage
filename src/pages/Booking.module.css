@@ -2,3 +2,6 @@
 @media(max-width:980px){.heroGrid{grid-template-columns:1fr}.deviceGrid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:660px){.hero{padding-top:48px}.card{padding:25px 19px}.stepLabel{display:none}.methodGrid,.serviceList,.formGrid{grid-template-columns:1fr}.deviceGrid{grid-template-columns:1fr 1fr}.slotsGrid{grid-template-columns:repeat(3,1fr)}.wide{grid-column:auto}.navRow button{flex:1}.successCard{padding:36px 20px}.successActions{flex-direction:column}.successActions>*{justify-content:center}}
 .slotsWrap { margin-top: 4px; }
+.embeddedSec{padding:34px 0 72px;scroll-margin-top:calc(var(--nav-h) + 18px)}
+.embeddedSec .wrapper{max-width:1120px}
+@media(max-width:660px){.embeddedSec{padding:24px 0 54px;scroll-margin-top:calc(var(--nav-h) + 10px)}}

@@ -2,11 +2,12 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const META = {
-  '/': ['Mobile Phone & Laptop Repair in Nagercoil | iHub', 'Professional iPhone, Android, laptop and tablet repair in Nagercoil with free mobile pickup and delivery in eligible areas.'],
+  '/': ['Mobile Phone & Laptop Repair in Nagercoil | iHub', 'Professional iPhone, Android, MacBook, Windows laptop and tablet repair in Nagercoil with free pickup and delivery in eligible areas.'],
   '/services': ['Device Repair Services in Nagercoil | iHub', 'Explore iPhone, Android, laptop, tablet, water-damage, chip-level and data-recovery services from iHub Nagercoil.'],
   '/pricing': ['Repair Pricing in Nagercoil | iHub', 'View indicative repair pricing and request a diagnosis before approving any repair.'],
-  '/pickup-delivery': ['Free Mobile Pickup & Delivery in Nagercoil | iHub', 'Schedule free doorstep pickup and return delivery for eligible mobile phone repairs in Nagercoil service areas.'],
-  '/booking': ['Book a Mobile Repair | iHub Nagercoil', 'Book an in-store repair appointment or schedule mobile phone pickup and delivery with iHub Nagercoil.'],
+  '/pickup-delivery': ['Free Device Pickup & Delivery in Nagercoil | iHub', 'Schedule free doorstep pickup and return delivery for eligible phones, MacBooks, Windows laptops and tablets in Nagercoil service areas.'],
+  '/sell-phone': ['Sell Your Used Phone in Nagercoil | iHub', 'Sell your used iPhone or Android phone to iHub Nagercoil. Submit device condition and photos, request an offer, then choose store handover or eligible pickup.'],
+  '/booking': ['Book a Repair | iHub Nagercoil', 'Book a repair through the iHub Free Pickup & Delivery page for supported phones, laptops and tablets.'],
   '/about': ['About iHub Device Repair | Nagercoil', 'Learn about iHub device repair, our repair process, diagnostics, quality checks and customer-first service standards.'],
   '/contact': ['Contact iHub Nagercoil | Device Repair', 'Contact iHub Nagercoil for device repair, quotes, directions, WhatsApp support, pickup and delivery enquiries.'],
   '/privacy': ['Privacy Policy | iHub Nagercoil', 'Read how iHub handles website enquiries, booking information and repair-related customer information.'],

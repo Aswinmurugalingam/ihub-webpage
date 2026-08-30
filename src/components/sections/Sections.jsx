@@ -12,7 +12,7 @@ import styles from './Sections.module.css';
 /* ─── SCROLL-DRIVEN REPAIR JOURNEY ─── */
 export function Process() {
   const steps = [
-    { icon:'truck', title:'Pickup / Visit', desc:'Choose a store appointment or eligible free mobile pickup.' },
+    { icon:'truck', title:'Pickup / Visit', desc:'Choose a store appointment or eligible free device pickup.' },
     { icon:'search', title:'Diagnose', desc:'We inspect the symptoms and confirm the repair route and estimate.' },
     { icon:'tool', title:'Repair', desc:'Approved work is completed with the appropriate tools and part option.' },
     { icon:'check', title:'Quality Check', desc:'Relevant charging, display, audio, camera and network functions are tested.' },
@@ -38,7 +38,7 @@ export function PricingSection({ showTitle=true }) {
   const navigate=useNavigate(); const featured=PRICING.find(i=>i.featured); const standard=PRICING.filter(i=>!i.featured); const ordered=featured&&standard.length>=2?[standard[0],featured,...standard.slice(1)]:PRICING;
   return <section className={styles.altSec}><div className="container">
     {showTitle&&<ScrollReveal><div className="section-header"><span className="tag">Indicative pricing</span><h2 style={{marginTop:14}}>Know the range <span className="brand-text">before approval</span></h2><p>Website prices are starting estimates. Device model, part option and actual fault determine the final quote.</p></div></ScrollReveal>}
-    <div className={styles.pricingGrid}>{ordered.map((p,i)=><ScrollReveal key={p.name} delay={i*.08}><div className={`${styles.priceCard} ${p.featured?styles.priceCardFeatured:''}`}>{p.featured&&<span className={`${styles.priceBadge} brand-grad`}>Popular</span>}<div className={styles.priceName}>{p.name}</div><div className={styles.priceFrom}>Indicative from</div><div className={styles.priceAmount}>{p.from}</div><ul className={styles.priceFeats}>{p.points.map(x=><li key={x}>{x}</li>)}</ul><button className={`${styles.priceBtn} brand-grad`} onClick={()=>navigate('/booking')}>Book This Repair</button></div></ScrollReveal>)}</div>
+    <div className={styles.pricingGrid}>{ordered.map((p,i)=><ScrollReveal key={p.name} delay={i*.08}><div className={`${styles.priceCard} ${p.featured?styles.priceCardFeatured:''}`}>{p.featured&&<span className={`${styles.priceBadge} brand-grad`}>Popular</span>}<div className={styles.priceName}>{p.name}</div><div className={styles.priceFrom}>Indicative from</div><div className={styles.priceAmount}>{p.from}</div><ul className={styles.priceFeats}>{p.points.map(x=><li key={x}>{x}</li>)}</ul><button className={`${styles.priceBtn} brand-grad`} onClick={()=>navigate('/pickup-delivery#book-repair')}>Book This Repair</button></div></ScrollReveal>)}</div>
     <p className={styles.priceNote}>Final price and warranty are confirmed after diagnosis and before repair approval.</p>
   </div></section>;
 }
@@ -51,7 +51,7 @@ export function Testimonials() {
     ['shield','Repair-specific warranty','Warranty duration and coverage are stated for the repair/part option selected.'],
     ['message','Clear communication','Booking and pickup details keep the repair handover simple and clear.'],
     ['tool','Function testing','Relevant functions are checked after repair before the device is marked ready.'],
-    ['truck','Convenient mobile service','Eligible iPhone and Android jobs can use free pickup and return delivery.'],
+    ['truck','Convenient mobile service','Eligible phones, MacBooks, Windows laptops and tablets can request free pickup and return delivery.'],
   ];
   return <section className={styles.padSec}><div className="container"><ScrollReveal><div className="section-header"><span className="tag">Service standard</span><h2 style={{marginTop:14}}>What to expect from <span className="brand-text">iHub</span></h2><p>Professional repair is more than replacing a part. The process should be clear before, during and after the job.</p></div></ScrollReveal><div className={styles.expectGrid}>{standards.map(([icon,title,desc],i)=><ScrollReveal key={title} delay={i*.05}><div className={styles.expectCard}><div className={styles.expectIcon}><Icon name={icon}/></div><h3>{title}</h3><p>{desc}</p></div></ScrollReveal>)}</div></div></section>;
 }
@@ -84,7 +84,7 @@ const FAQ_ITEMS=[
   {q:'How is diagnosis handled?',a:'The device is assessed before repair approval. If any diagnostic or data-recovery charge applies to a particular job, iHub should disclose it before chargeable work begins.'},
   {q:'How does repair warranty work?',a:'Warranty depends on the repair and part option selected. The confirmed invoice/job sheet should state the exact duration and coverage. New physical damage, liquid damage or unrelated faults are normally outside the replaced-part warranty.'},
   {q:'Can you recover data from a dead phone?',a:'Data recovery may be possible depending on the type of damage and storage condition, but recovery cannot be guaranteed. The device should be assessed before any recovery promise is made.'},
-  {q:'Do you offer free pickup and delivery?',a:'Yes — the website supports free pickup and return delivery for eligible mobile-phone repairs in supported Nagercoil areas. Availability is confirmed against the address and pickup window before collection.'},
+  {q:'Do you offer free pickup and delivery?',a:'Yes — the website supports free pickup and return delivery for eligible supported-device repairs in supported Nagercoil areas. Availability is confirmed against the address and pickup window before collection.'},
   {q:'How is my device data handled?',a:'Hardware repair should not require browsing personal files. Back up important data where possible. If software, data-recovery or testing work requires device access, the scope should be agreed before work begins.'},
 ];
 
@@ -92,4 +92,4 @@ export function FaqSection(){const[open,setOpen]=useState(null);return <section 
 
 export function GoogleRatingBadge(){return null;}
 
-export function MobileStickyBar(){const[visible,setVisible]=useState(false);const navigate=useNavigate();useEffect(()=>{const onScroll=()=>setVisible(window.scrollY>320);window.addEventListener('scroll',onScroll,{passive:true});return()=>window.removeEventListener('scroll',onScroll)},[]);return <AnimatePresence>{visible&&<motion.div className={styles.stickyBar} initial={{y:80,opacity:0}} animate={{y:0,opacity:1}} exit={{y:80,opacity:0}} transition={{type:'spring',stiffness:300,damping:30}}><button className={`${styles.stickyBtn} ${styles.stickyPrimary}`} onClick={()=>navigate('/booking?method=pickup')}><Icon name="truck" size={18}/>Free Pickup</button><a href="https://wa.me/919025790266?text=Hi%2C%20I%20need%20a%20repair%20quote" target="_blank" rel="noopener" className={`${styles.stickyBtn} ${styles.stickyWa}`}><Icon name="message" size={17}/>WhatsApp</a></motion.div>}</AnimatePresence>}
+export function MobileStickyBar(){const[visible,setVisible]=useState(false);const navigate=useNavigate();useEffect(()=>{const onScroll=()=>setVisible(window.scrollY>320);window.addEventListener('scroll',onScroll,{passive:true});return()=>window.removeEventListener('scroll',onScroll)},[]);return <AnimatePresence>{visible&&<motion.div className={styles.stickyBar} initial={{y:80,opacity:0}} animate={{y:0,opacity:1}} exit={{y:80,opacity:0}} transition={{type:'spring',stiffness:300,damping:30}}><button className={`${styles.stickyBtn} ${styles.stickyPrimary}`} onClick={()=>navigate('/pickup-delivery#book-repair')}><Icon name="truck" size={18}/>Free Pickup</button><a href="https://wa.me/919025790266?text=Hi%2C%20I%20need%20a%20repair%20quote" target="_blank" rel="noopener" className={`${styles.stickyBtn} ${styles.stickyWa}`}><Icon name="message" size={17}/>WhatsApp</a></motion.div>}</AnimatePresence>}

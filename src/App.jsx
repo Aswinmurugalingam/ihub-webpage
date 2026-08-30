@@ -15,8 +15,8 @@ const Services      = lazy(() => import('./pages/Services'));
 const Pricing       = lazy(() => import('./pages/Pricing'));
 const About         = lazy(() => import('./pages/About'));
 const Contact       = lazy(() => import('./pages/Contact'));
-const Booking       = lazy(() => import('./pages/Booking'));
 const PickupDelivery= lazy(() => import('./pages/PickupDelivery'));
+const SellPhone     = lazy(() => import('./pages/SellPhone'));
 const Policy        = lazy(() => import('./pages/Policy'));
 const NotFound      = lazy(() => import('./pages/NotFound'));
 
@@ -49,8 +49,9 @@ function AnimatedRoutes() {
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/booking" element={<Booking />} />
+            <Route path="/booking" element={<Navigate to="/pickup-delivery#book-repair" replace />} />
             <Route path="/pickup-delivery" element={<PickupDelivery />} />
+            <Route path="/sell-phone" element={<SellPhone />} />
             <Route path="/privacy" element={<Policy />} />
             <Route path="/repair-policy" element={<Policy />} />
             <Route path="*" element={<NotFound />} />

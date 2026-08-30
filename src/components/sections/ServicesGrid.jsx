@@ -71,7 +71,7 @@ function ServiceModal({ service, onClose }) {
               <Icon name="truck" size={20}/>
               <div>
                 <strong>Free Pickup + Free Delivery</strong>
-                <span>Available for eligible mobile-phone repairs in supported Nagercoil areas.</span>
+                <span>Available for eligible supported-device repairs in supported Nagercoil areas.</span>
               </div>
             </div>
           )}
@@ -108,8 +108,8 @@ function ServiceModal({ service, onClose }) {
         </div>
 
         <div className={styles.modalActions}>
-          <Link to="/booking" className="btn-primary brand-grad">Book This Repair</Link>
-          {isPickupEligible && <Link to="/booking?method=pickup" className="btn-secondary"><Icon name="truck" size={16}/> Free Pickup</Link>}
+          <Link to="/pickup-delivery#book-repair" className="btn-primary brand-grad">Book This Repair</Link>
+          {isPickupEligible && <Link to="/pickup-delivery#book-repair" className="btn-secondary"><Icon name="truck" size={16}/> Free Pickup</Link>}
           <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="btn-secondary">WhatsApp Quote</a>
         </div>
       </motion.section>
