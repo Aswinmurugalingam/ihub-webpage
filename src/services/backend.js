@@ -1,13 +1,34 @@
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || '';
 
 export const backendReady = Boolean(SUPABASE_URL && SUPABASE_KEY);
 
+async function notifyAdmin(type, reference) {
+  if (!backendReady || !type || !reference) return false;
+  const url = `${SUPABASE_URL}/functions/v1/notify-admin`;
+  let lastError = '';
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ type, reference }),
+      });
+      if (res.ok) return true;
+      lastError = await res.text();
+    } catch (error) {
+      lastError = String(error?.message || error || 'Notification request failed');
+    }
+    if (attempt === 0) await new Promise(resolve => setTimeout(resolve, 450));
+  }
+  console.warn('iHub request email notification failed:', lastError);
+  return false;
+}
+
 function headers(prefer = '') {
   return {
     apikey: SUPABASE_KEY,
-    Authorization: `Bearer ${SUPABASE_KEY}`,
     'Content-Type': 'application/json',
     ...(prefer ? { Prefer: prefer } : {}),
   };
@@ -45,7 +66,8 @@ export async function createBooking(payload) {
   if (backendReady) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/ihub_bookings`, { method: 'POST', headers: headers('return=minimal'), body: JSON.stringify(row) });
     if (!res.ok) throw new Error(await res.text() || 'Booking failed');
-    return row;
+    const admin_email_sent = await notifyAdmin('booking', trackingId);
+    return { ...row, admin_email_sent };
   }
   const items = localRead('ihub_bookings'); items.push(row); localWrite('ihub_bookings', items);
   return row;
@@ -57,7 +79,8 @@ export async function createEnquiry(payload) {
   if (backendReady) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/ihub_enquiries`, { method: 'POST', headers: headers('return=minimal'), body: JSON.stringify(row) });
     if (!res.ok) throw new Error(await res.text() || 'Enquiry failed');
-    return row;
+    const admin_email_sent = await notifyAdmin('enquiry', reference);
+    return { ...row, admin_email_sent };
   }
   if (WEB3FORMS_KEY) {
     const res = await fetch('https://api.web3forms.com/submit', { method:'POST', headers:{'Content-Type':'application/json', Accept:'application/json'}, body:JSON.stringify({ access_key:WEB3FORMS_KEY, subject:`iHub enquiry ${reference}`, from_name:'iHub Website', ...payload }) });
@@ -86,8 +109,7 @@ async function uploadSellPhoto(reference, slot, file) {
     method: 'POST',
     headers: {
       apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': file.type || 'image/jpeg',
+        'Content-Type': file.type || 'image/jpeg',
       'x-upsert': 'false',
     },
     body: file,
@@ -143,8 +165,10 @@ export async function createSellRequest(payload, photoEntries = [], onProgress =
       body: JSON.stringify(row),
     });
     if (!res.ok) throw new Error(await res.text() || 'Sell request could not be submitted');
+    onProgress({ percent: 92, phaseLabel: 'Notifying iHub', message: 'Sending your request to the iHub team…' });
+    const admin_email_sent = await notifyAdmin('sell', reference);
     onProgress({ percent: 96, phaseLabel: 'Finalising', message: 'Finalising your Sell Phone request…' });
-    return row;
+    return { ...row, admin_email_sent };
   }
 
   const items = localRead('ihub_sell_requests');

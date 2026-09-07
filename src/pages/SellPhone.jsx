@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import { flushSync } from 'react-dom';
 import Icon from '../components/ui/Icon';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import LocationPicker from '../components/ui/LocationPicker';
+import SuccessModal from '../components/ui/SuccessModal';
 import { createSellRequest, makeReference } from '../services/backend';
 import { BRAND_OPTIONS, getBrandModels, searchPhoneModels } from '../data/phoneCatalog';
 import sellPhoneHandover from '../assets/sell-phone-handover.png';
@@ -34,7 +35,7 @@ function initialForm() {
     brand: '', model: '', storage: '', color: '', purchaseYear: '', batteryHealth: '',
     screenCondition: '', bodyCondition: '', functions: emptyFunctions(), repairedBefore: 'no', repairDetails: '',
     liquidDamage: 'no', switchesOn: 'yes', accountLock: 'no', financed: 'no', ownershipConfirmed: false, termsConfirmed: false,
-    accessories: [], handoverMethod: 'store', address: '', area: '', landmark: '', pincode: '', preferredDate: '', preferredTime: '',
+    accessories: [], handoverMethod: 'pickup', address: '', area: '', landmark: '', pincode: '', mapLink: '', preferredDate: '', preferredTime: '',
     name: '', phone: '', email: '', notes: '',
   };
 }
@@ -219,16 +220,16 @@ function ModelAutocomplete({ brand, value, onSelect }) {
 }
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+const emailValid = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
 
 function SubmissionOverlay({ status, progress }) {
-  const submitted = status === 'submitted';
-  return <AnimatePresence>{(status==='sending'||submitted)&&<motion.div className={styles.submitOverlay} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+  return <AnimatePresence>{status==='sending'&&<motion.div className={styles.submitOverlay} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
     <motion.div className={styles.submitOverlayCard} initial={{scale:.96,y:18}} animate={{scale:1,y:0}}>
-      <div className={`${styles.submitSpinner} ${submitted?styles.submitDone:''}`}>{submitted?<Icon name="check" size={32}/>:<span/>}</div>
-      <span className={styles.submitEyebrow}>{submitted?'REQUEST RECEIVED':'SECURE SUBMISSION'}</span>
-      <h3>{submitted?'Request submitted':'Submitting your request…'}</h3>
-      <p>{submitted?'Your Sell Phone request has been saved successfully.':progress?.message || 'Please keep this page open while we securely prepare your request.'}</p>
-      {!submitted&&<><div className={styles.submitProgressTrack}><motion.div animate={{width:`${Math.max(6,Math.min(100,progress?.percent||12))}%`}}/></div><div className={styles.submitProgressMeta}><span>{progress?.phaseLabel||'Preparing'}</span><strong>{Math.round(progress?.percent||12)}%</strong></div></>}
+      <div className={styles.submitSpinner}><span/></div>
+      <span className={styles.submitEyebrow}>SECURE SUBMISSION</span>
+      <h3>Submitting your request…</h3>
+      <p>{progress?.message || 'Please keep this page open while we securely prepare your request.'}</p>
+      <div className={styles.submitProgressTrack}><motion.div animate={{width:`${Math.max(6,Math.min(100,progress?.percent||12))}%`}}/></div><div className={styles.submitProgressMeta}><span>{progress?.phaseLabel||'Preparing'}</span><strong>{Math.round(progress?.percent||12)}%</strong></div>
     </motion.div>
   </motion.div>}</AnimatePresence>;
 }
@@ -267,7 +268,8 @@ export default function SellPhone() {
 
   const update = (key, value) => setForm(prev => ({...prev, [key]: value}));
   const phoneOk = form.phone.replace(/\D/g,'').length >= 10 && form.phone.replace(/\D/g,'').length <= 15;
-  const pincodeOk = form.handoverMethod !== 'pickup' || /^\d{5,8}$/.test(form.pincode.replace(/\D/g,''));
+  const pincodeOk = /^\d{5,8}$/.test(form.pincode.replace(/\D/g,''));
+  const emailOk = emailValid(form.email);
   const requiredPhotosReady = ['front','back','left','right'].every(key => photos[key]);
 
   const canContinue = useMemo(() => {
@@ -276,9 +278,9 @@ export default function SellPhone() {
     if (step===3) return form.liquidDamage && form.switchesOn && form.accountLock && form.financed && form.ownershipConfirmed;
     if (step===4) return requiredPhotosReady;
     if (step===5) return true;
-    if (step===6) return form.name.trim().length>=2 && phoneOk && form.termsConfirmed && pincodeOk && (form.handoverMethod==='store' || (form.address.trim().length>=5 && form.area.trim().length>=2));
+    if (step===6) return form.name.trim().length>=2 && phoneOk && emailOk && form.termsConfirmed && pincodeOk && form.address.trim().length>=5 && form.area.trim().length>=2 && !!form.mapLink;
     return false;
-  }, [step, form, phoneOk, pincodeOk, requiredPhotosReady]);
+  }, [step, form, phoneOk, emailOk, pincodeOk, requiredPhotosReady]);
 
   const toggleFunction = label => setForm(prev => ({...prev, functions:{...prev.functions,[label]:!prev.functions[label]}}));
   const toggleAccessory = label => setForm(prev => ({...prev, accessories:prev.accessories.includes(label)?prev.accessories.filter(x=>x!==label):[...prev.accessories,label]}));
@@ -344,11 +346,12 @@ export default function SellPhone() {
       ownership_confirmed: form.ownershipConfirmed,
       terms_confirmed: form.termsConfirmed,
       accessories: form.accessories,
-      handover_method: form.handoverMethod,
-      address: form.handoverMethod==='pickup' ? form.address.trim() : '',
-      area: form.handoverMethod==='pickup' ? form.area.trim() : '',
-      landmark: form.handoverMethod==='pickup' ? form.landmark.trim() : '',
-      pincode: form.handoverMethod==='pickup' ? form.pincode.trim() : '',
+      handover_method: 'pickup',
+      address: form.address.trim(),
+      area: form.area.trim(),
+      landmark: form.landmark.trim(),
+      pincode: form.pincode.trim(),
+      map_link: form.mapLink,
       preferred_date: form.preferredDate || null,
       preferred_time: form.preferredTime || '',
       customer_name: form.name.trim(),
@@ -370,28 +373,28 @@ export default function SellPhone() {
       await minimumDelay;
       setSubmitProgress({ percent: 100, message: 'Your request has been saved successfully.', phaseLabel: 'Complete' });
       setResult(saved);
-      setStatus('submitted');
-      await wait(1100);
+      await wait(350);
       setStatus('success');
-      window.scrollTo({top:0,behavior:'smooth'});
     } catch (e) {
       setStatus('error');
       setError(String(e?.message || 'Could not submit your sell request. Please try WhatsApp instead.'));
     }
   };
 
-  if (status==='success' && result) {
-    const wa = `https://wa.me/919025790266?text=${encodeURIComponent(`Hi iHub, I submitted a Sell Phone request. Reference: ${result.reference}. Device: ${result.brand} ${result.model} ${result.storage}.`)}`;
-    return <section className={styles.successPage}><div className="container"><motion.div className={styles.successCard} initial={{opacity:0,y:24,scale:.97}} animate={{opacity:1,y:0,scale:1}}><div className={styles.successIcon}><Icon name="check" size={36}/></div><span className="tag">Sell request received</span><h1>We’ll review your <span className="brand-text">phone details.</span></h1><p>This is a request for review, not a guaranteed purchase price. iHub can confirm an indicative offer after reviewing the condition and photos, with the final amount confirmed after physical inspection.</p><div className={styles.reference}><span>Your reference</span><strong>{result.reference}</strong></div><div className={styles.successActions}><a href={wa} target="_blank" rel="noopener noreferrer" className="btn-primary brand-grad"><Icon name="message" size={17}/>Continue on WhatsApp</a><Link to="/" className="btn-secondary">Back Home</Link></div></motion.div></div></section>;
-  }
+  const resetSellRequest=()=>{
+    Object.values(photoPreviews).forEach(url=>{try{URL.revokeObjectURL(url)}catch{/* ignore */}});
+    setStep(1);setForm(initialForm());setPhotos({});setPhotoPreviews({});setStatus('idle');setError('');setResult(null);setPhotoProcess({});setSubmitProgress({percent:0,message:'Preparing your request…',phaseLabel:'Preparing'});
+    window.setTimeout(()=>document.getElementById('sell-form')?.scrollIntoView({behavior:'smooth',block:'start'}),40);
+  };
 
   return <>
     <SubmissionOverlay status={status} progress={submitProgress}/>
+    <SuccessModal open={status==='success'&&!!result} eyebrow="Sell Phone request received" title="Your phone request was sent" message="Your phone details, condition, photos and pickup information have reached the iHub team. We will review everything and call or WhatsApp you about the next step. The final buying price is confirmed after physical inspection." reference={result?.reference} referenceLabel="Sell Request Reference" onOk={resetSellRequest}/>
     <section className={styles.hero}><div className="container"><div className={styles.heroLayout}>
       <motion.div className={styles.heroCopy} initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:.7,ease:[.22,1,.36,1]}}>
         <span className="tag">Sell your used phone</span>
         <h1>Turn your old phone <span className="brand-text">into value.</span></h1>
-        <p>Tell iHub about your device, condition and accessories. Upload a few clear photos, request a review, then choose store handover or eligible pickup if you accept the offer.</p>
+        <p>Tell iHub about your device, condition and accessories. Upload a few clear photos, request a review, and our team can coordinate pickup if you accept the offer.</p>
         <div className={styles.heroPoints}><div><Icon name="camera" size={18}/><span>Photo-based first review</span></div><div><Icon name="shield" size={18}/><span>Ownership confirmation</span></div><div><Icon name="wallet" size={18}/><span>Final price after inspection</span></div></div>
         <a href="#sell-form" className="btn-primary brand-grad"><Icon name="phone" size={17}/>Start Phone Valuation</a>
       </motion.div>
@@ -402,7 +405,7 @@ export default function SellPhone() {
       ['phone','Tell us about it','Brand, model, storage and condition.'],
       ['camera','Upload photos','Front, back and both sides for review.'],
       ['wallet','Receive an offer','iHub contacts you after reviewing the request.'],
-      ['truck','Pickup or visit','Choose store handover or eligible collection.'],
+      ['truck','Request pickup','Share your pickup address and map location for handover.'],
       ['check','Inspect & get paid','Final value is confirmed after physical inspection.'],
     ].map(([icon,title,desc],i)=><ScrollReveal key={title} delay={i*.05}><div className={styles.howCard}><span>0{i+1}</span><div className={styles.howIcon}><Icon name={icon}/></div><h3>{title}</h3><p>{desc}</p></div></ScrollReveal>)}</div></div></section>
 
@@ -433,14 +436,18 @@ export default function SellPhone() {
 
         {step===5&&<><div className={styles.cardHead}><span>Step 05</span><h3>Box, bill & accessories</h3><p>Select everything you can hand over with the phone. Accessories and proof of purchase may affect the final value.</p></div><div className={styles.accessoryGrid}>{ACCESSORIES.map(item=><button key={item} type="button" className={`${styles.accessoryBtn} ${form.accessories.includes(item)?styles.selected:''}`} onClick={()=>toggleAccessory(item)}><div><Icon name={form.accessories.includes(item)?'check':'layers'} size={20}/><strong>{item}</strong></div><span>{form.accessories.includes(item)?'Included':'Not selected'}</span></button>)}</div><label className={`${styles.field} ${styles.notesField}`}><span>Anything else to mention?</span><textarea value={form.notes} onChange={e=>update('notes',e.target.value)} placeholder="Optional notes about condition, accessories or the phone" rows="4"/></label></>}
 
-        {step===6&&<><div className={styles.cardHead}><span>Step 06</span><h3>Handover & contact details</h3><p>Choose how you would like iHub to receive the phone if you accept the offer.</p></div><div className={styles.handoverGrid}><button type="button" className={`${styles.handoverCard} ${form.handoverMethod==='store'?styles.selected:''}`} onClick={()=>update('handoverMethod','store')}><Icon name="pin" size={28}/><strong>Visit iHub Store</strong><span>Bring the device after the offer is discussed.</span></button><button type="button" className={`${styles.handoverCard} ${form.handoverMethod==='pickup'?styles.selected:''}`} onClick={()=>update('handoverMethod','pickup')}><Icon name="truck" size={28}/><strong>Request Pickup</strong><span>Available after iHub confirms eligibility and area.</span></button></div><div className={styles.formGrid}>
+        {step===6&&<><div className={styles.cardHead}><span>Step 06</span><h3>Pickup & contact details</h3><p>Enter your contact and pickup details. If you accept the offer, iHub will confirm the collection timing with you.</p></div><div className={styles.pickupOnlyCard}><div className={styles.pickupOnlyIcon}><Icon name="truck" size={28}/></div><div><span>REQUEST PICKUP</span><strong>Pickup handover is selected</strong><small>Our team will confirm eligibility, location and timing before collection.</small></div></div><div className={styles.formGrid}>
           <Field label="Full name *" value={form.name} onChange={v=>update('name',v)} placeholder="Your name"/>
           <Field label="Phone / WhatsApp *" value={form.phone} onChange={v=>update('phone',v)} placeholder="+91 9XXXXXXXXX" type="tel" inputMode="tel"/>
-          <Field label="Email (optional)" value={form.email} onChange={v=>update('email',v)} placeholder="you@example.com" type="email"/>
+          <Field label="Email *" value={form.email} onChange={v=>update('email',v)} placeholder="you@example.com" type="email"/>
           <DateField label="Preferred date" value={form.preferredDate} onChange={v=>update('preferredDate',v)}/>
           <label className={styles.field}><span>Preferred time</span><select value={form.preferredTime} onChange={e=>update('preferredTime',e.target.value)}><option value="">Any convenient time</option><option>10:00 AM - 12:00 PM</option><option>12:00 PM - 2:00 PM</option><option>2:00 PM - 4:00 PM</option><option>4:00 PM - 6:00 PM</option><option>6:00 PM - 8:00 PM</option></select></label>
-          {form.handoverMethod==='pickup'&&<><Field label="House / building & street *" value={form.address} onChange={v=>update('address',v)} placeholder="Pickup address" wide/><Field label="Area *" value={form.area} onChange={v=>update('area',v)} placeholder="Area / locality"/><Field label="Pincode *" value={form.pincode} onChange={v=>update('pincode',v)} placeholder="629..." inputMode="numeric"/><Field label="Landmark" value={form.landmark} onChange={v=>update('landmark',v)} placeholder="Nearby landmark"/></>}
-        </div>{form.phone&&!phoneOk&&<p className={styles.validation}>Enter a valid 10 to 15 digit phone number.</p>}{form.handoverMethod==='pickup'&&form.pincode&&!pincodeOk&&<p className={styles.validation}>Enter a valid 5 to 8 digit pincode.</p>}<div className={styles.summary}><div><span>Device</span><strong>{form.brand} {form.model} · {form.storage}</strong></div><div><span>Condition</span><strong>{form.screenCondition} screen · {form.bodyCondition} body</strong></div><div><span>Photos</span><strong>{Object.keys(photos).length} uploaded</strong></div><div><span>Handover</span><strong>{form.handoverMethod==='pickup'?'Request pickup':'Visit iHub Store'}</strong></div></div><label className={styles.confirmBox}><input type="checkbox" checked={form.termsConfirmed} onChange={e=>update('termsConfirmed',e.target.checked)}/><span><strong>I understand the first offer is not the final guaranteed price.</strong><small>The final buying price is confirmed only after physical inspection. I will back up my data, remove account/activation locks and prepare the device for handover before sale.</small></span></label></>}
+          <Field label="House / building & street *" value={form.address} onChange={v=>update('address',v)} placeholder="Pickup address" wide/>
+          <Field label="Area *" value={form.area} onChange={v=>update('area',v)} placeholder="Area / locality"/>
+          <Field label="Pincode *" value={form.pincode} onChange={v=>update('pincode',v)} placeholder="629..." inputMode="numeric"/>
+          <Field label="Landmark" value={form.landmark} onChange={v=>update('landmark',v)} placeholder="Nearby landmark"/>
+          <LocationPicker value={form.mapLink} onChange={v=>update('mapLink',v)} label="Pickup location *"/>
+        </div>{form.phone&&!phoneOk&&<p className={styles.validation}>Enter a valid 10 to 15 digit phone number.</p>}{form.email&&!emailOk&&<p className={styles.validation}>Enter a valid email address. We will send your Sell Phone request confirmation here.</p>}{form.pincode&&!pincodeOk&&<p className={styles.validation}>Enter a valid 5 to 8 digit pincode.</p>}{!form.mapLink&&<p className={styles.validation}>Choose your pickup location on the map before submitting.</p>}<div className={styles.summary}><div><span>Device</span><strong>{form.brand} {form.model} · {form.storage}</strong></div><div><span>Condition</span><strong>{form.screenCondition} screen · {form.bodyCondition} body</strong></div><div><span>Photos</span><strong>{Object.keys(photos).length} uploaded</strong></div><div><span>Handover</span><strong>Request pickup</strong></div></div><label className={styles.confirmBox}><input type="checkbox" checked={form.termsConfirmed} onChange={e=>update('termsConfirmed',e.target.checked)}/><span><strong>I understand the first offer is not the final guaranteed price.</strong><small>The final buying price is confirmed only after physical inspection. I will back up my data, remove account/activation locks and prepare the device for pickup before sale.</small></span></label></>}
 
         {error&&<div className={styles.error}><Icon name="help" size={18}/><span>{error}</span></div>}
         <div className={styles.formNav}>{step>1?<button type="button" className="btn-secondary" onClick={()=>{setError('');setStep(s=>s-1)}}>Back</button>:<span/>}{step<6?<button type="button" className="btn-primary brand-grad" disabled={!canContinue} onClick={()=>{setError('');setStep(s=>s+1)}}>Continue →</button>:<button type="button" className="btn-primary brand-grad" disabled={!canContinue||status==='sending'} onClick={submit}>{status==='sending'?'Submitting…':'Request My Offer'}</button>}</div>

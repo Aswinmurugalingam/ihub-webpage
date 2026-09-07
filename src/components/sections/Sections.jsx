@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PRICING, WHY_US, CONTACT_ITEMS } from '../../data/siteData';
 import TiltCard from '../ui/TiltCard';
 import ScrollReveal from '../ui/ScrollReveal';
 import Icon from '../ui/Icon';
+import SuccessModal from '../ui/SuccessModal';
 import DeviceScene from '../3d/DeviceScene';
 import { createEnquiry } from '../../services/backend';
 import styles from './Sections.module.css';
@@ -63,18 +64,21 @@ export function CtaBanner({ title, sub, btn1Text, btn1Link, btn2Text, btn2Link }
 
 export function ContactBlock({ formId='main' }) {
   const [status,setStatus]=useState('idle'); const [reference,setReference]=useState('');
-  const handleSubmit=async(e)=>{e.preventDefault();setStatus('sending');const fd=new FormData(e.currentTarget);const payload={name:fd.get('name'),phone:fd.get('phone'),email:fd.get('email')||'',device:fd.get('device'),service:fd.get('service'),description:fd.get('description')};try{const result=await createEnquiry(payload);setReference(result.reference||'');setStatus('success')}catch{setStatus('error')}};
+  const formRef=useRef(null);
+  const handleSubmit=async(e)=>{e.preventDefault();setStatus('sending');const fd=new FormData(e.currentTarget);const payload={name:fd.get('name'),phone:fd.get('phone'),email:String(fd.get('email')||'').trim(),device:fd.get('device'),service:fd.get('service'),description:fd.get('description')};try{const result=await createEnquiry(payload);setReference(result.reference||'');setStatus('success')}catch{setStatus('error')}};
+  const resetContact=()=>{formRef.current?.reset();setStatus('idle');setReference('');};
   return <div className={styles.contactGrid}>
-    <ScrollReveal direction="left"><div><span className="tag">Contact iHub</span><h2 style={{fontSize:'clamp(2rem,4vw,3.4rem)',margin:'16px 0 20px'}}>Talk to a <span className="brand-text">repair specialist</span></h2><p style={{color:'var(--fg2)',lineHeight:1.7,marginBottom:30}}>Get a quote, ask about pickup coverage, book a repair or visit the Nagercoil store.</p><div className={styles.contactItems}>{CONTACT_ITEMS.map((c,i)=>{const inner=<><div className={styles.cIcon}><Icon name={c.icon}/></div><div><div className={styles.cLabel}>{c.label}</div><div className={styles.cValue}>{c.value}</div></div></>;return c.href?<motion.a key={i} href={c.href} target={c.external?'_blank':undefined} rel={c.external?'noopener noreferrer':undefined} className={styles.contactItem} whileHover={{x:7,scale:1.01}}>{inner}</motion.a>:<div key={i} className={styles.contactItem}>{inner}</div>})}</div><div className={styles.pickupMini}><Icon name="truck"/><div><strong>Need doorstep service?</strong><span>Free pickup & delivery for eligible mobile repairs.</span></div><Link to="/pickup-delivery">View details →</Link></div></div></ScrollReveal>
-    <ScrollReveal delay={.12} direction="right"><div className={styles.formBox}><h3 style={{fontFamily:'var(--font-display)',fontSize:'1.3rem',marginBottom:6}}>Get a repair quote</h3><p style={{fontSize:'.875rem',color:'var(--fg2)',marginBottom:28}}>Send your device details. iHub can follow up by phone or WhatsApp.</p>{status==='success'?<div className={styles.formSuccess}><Icon name="check" size={32}/><strong>Request received</strong><span>{reference?`Reference: ${reference}`:'Your request has been saved.'}</span><a href="https://wa.me/919025790266?text=Hi%2C%20I%20just%20sent%20a%20repair%20quote%20request" target="_blank" rel="noopener" className="btn-secondary">Continue on WhatsApp</a></div>:<form onSubmit={handleSubmit}>
+    <SuccessModal open={status==='success'} eyebrow="Repair enquiry received" title="Request sent successfully" message="Your repair enquiry has reached the iHub Nagercoil team. Our staff will call or WhatsApp you to discuss the repair and next step." reference={reference} onOk={resetContact}/>
+    <ScrollReveal direction="left"><div><span className="tag">Contact iHub</span><h2 style={{fontSize:'clamp(2rem,4vw,3.4rem)',margin:'16px 0 20px'}}>Talk to a <span className="brand-text">repair specialist</span></h2><p style={{color:'var(--fg2)',lineHeight:1.7,marginBottom:30}}>Get a quote, ask about pickup coverage, sell a used phone, book a repair or email ihubnagercoil@gmail.com.</p><div className={styles.contactItems}>{CONTACT_ITEMS.map((c,i)=>{const inner=<><div className={styles.cIcon}><Icon name={c.icon}/></div><div><div className={styles.cLabel}>{c.label}</div><div className={styles.cValue}>{c.value}</div></div></>;return c.href?<motion.a key={i} href={c.href} target={c.external?'_blank':undefined} rel={c.external?'noopener noreferrer':undefined} className={styles.contactItem} whileHover={{x:7,scale:1.01}}>{inner}</motion.a>:<div key={i} className={styles.contactItem}>{inner}</div>})}</div><div className={styles.pickupMini}><Icon name="truck"/><div><strong>Need doorstep service?</strong><span>Free pickup & delivery for eligible supported-device repairs.</span></div><Link to="/pickup-delivery">View details →</Link></div></div></ScrollReveal>
+    <ScrollReveal delay={.12} direction="right"><div className={styles.formBox}><h3 style={{fontFamily:'var(--font-display)',fontSize:'1.3rem',marginBottom:6}}>Get a repair quote</h3><p style={{fontSize:'.875rem',color:'var(--fg2)',marginBottom:28}}>Send your device details. iHub can follow up by phone or WhatsApp.</p><form ref={formRef} onSubmit={handleSubmit}>
       <div className={styles.formTwo}><div className={styles.field}><label htmlFor={`${formId}-name`}>Full Name</label><input id={`${formId}-name`} name="name" placeholder="Your name" required/></div><div className={styles.field}><label htmlFor={`${formId}-phone`}>Phone / WhatsApp</label><input id={`${formId}-phone`} name="phone" type="tel" inputMode="tel" placeholder="+91 9XXXXXXXXX" required/></div></div>
-      <div className={styles.field}><label htmlFor={`${formId}-email`}>Email (optional)</label><input id={`${formId}-email`} name="email" type="email" placeholder="you@example.com"/></div>
+      <div className={styles.field}><label htmlFor={`${formId}-email`}>Email</label><input id={`${formId}-email`} name="email" type="email" placeholder="you@example.com" required/></div>
       <div className={styles.field}><label htmlFor={`${formId}-device`}>Device & Model</label><input id={`${formId}-device`} name="device" placeholder="e.g. iPhone 15 Pro / Galaxy S24" required/></div>
       <div className={styles.field}><label htmlFor={`${formId}-service`}>Service Needed</label><select id={`${formId}-service`} name="service" required defaultValue=""><option value="" disabled>Select a service...</option>{['Screen Replacement','Battery Replacement','Water Damage','Motherboard / Chip-Level','Data Recovery','Software / Other'].map(o=><option key={o}>{o}</option>)}</select></div>
       <div className={styles.field}><label htmlFor={`${formId}-desc`}>Describe the Issue</label><textarea id={`${formId}-desc`} name="description" placeholder="What is happening with the device?" required/></div>
       {status==='error'&&<p className={styles.formError}>Could not submit right now. Please call or WhatsApp iHub.</p>}
       <button type="submit" className={`${styles.formSubmit} brand-grad`} disabled={status==='sending'}>{status==='sending'?'Sending…':'Request Callback →'}</button>
-    </form>}</div></ScrollReveal>
+    </form></div></ScrollReveal>
   </div>;
 }
 
