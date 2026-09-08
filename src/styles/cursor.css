@@ -1,27 +1,19 @@
 /* iHub branded desktop cursor.
    Touch/coarse-pointer devices keep their native behavior.
-   The click hotspot is the upper-left visible corner of the orange cone,
-   so the cursor behaves more like a normal pointer when selecting buttons/links. */
+   The custom cone remains active across every normal UI surface, including
+   buttons, links, FAQ rows and SVG/icon children. Text-entry fields keep the
+   I-beam so typing and text selection remain usable. */
 @media (hover: hover) and (pointer: fine) {
   html,
   body,
-  #root {
-    cursor: url('/ihub-cone-cursor.png') 3 2, default;
+  #root,
+  #root * {
+    cursor: url('/ihub-cone-cursor.png') 2 1, default !important;
   }
 
-  a,
-  button,
-  select,
-  summary,
-  label,
-  [role='button'],
-  [role='link'] {
-    cursor: url('/ihub-cone-cursor.png') 3 2, pointer !important;
-  }
-
-  input,
-  textarea,
-  [contenteditable='true'] {
+  #root input,
+  #root textarea,
+  #root [contenteditable='true'] {
     cursor: text !important;
   }
 }

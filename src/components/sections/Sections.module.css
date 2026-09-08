@@ -283,10 +283,10 @@
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 20px 26px;
-  cursor: pointer;
-  transition: border-color .2s, background .2s;
-  backdrop-filter: blur(10px);
+  padding: 0 26px;
+  transition: border-color .14s ease, background .14s ease;
+  /* Avoid backdrop-filter repainting while the answer expands. */
+  backdrop-filter: none;
 }
 .faqItem:hover,
 .faqOpen {
@@ -296,10 +296,17 @@
   background: rgba(245,130,32,.05);
 }
 .faqQ {
+  width: 100%;
+  min-height: 62px;
+  padding: 18px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  font-family: var(--font-body);
   font-size: .95rem;
   font-weight: 600;
   color: var(--fg);
@@ -313,15 +320,37 @@
   font-weight: 400;
   width: 20px;
   text-align: center;
+  transition: transform .12s ease, opacity .12s ease;
+}
+.faqQ:active .faqChevron {
+  transform: scale(.88);
+}
+.faqAnswerWrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition:
+    grid-template-rows .15s cubic-bezier(.22,1,.36,1),
+    opacity .11s ease,
+    transform .15s cubic-bezier(.22,1,.36,1);
+  will-change: opacity, transform;
+}
+.faqOpen .faqAnswerWrap {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+}
+.faqAnswerClip {
+  min-height: 0;
+  overflow: hidden;
 }
 .faqA {
   font-size: .88rem;
   color: var(--fg2);
   line-height: 1.7;
-  margin-top: 14px;
-  padding-top: 14px;
+  padding: 14px 0 18px;
   border-top: 1px solid var(--border);
-  overflow: hidden;
 }
 
 /* ─── GOOGLE RATING BADGE ─── */
