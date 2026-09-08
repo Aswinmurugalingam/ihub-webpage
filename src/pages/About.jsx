@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ABOUT_VALUES, ABOUT_MILESTONES } from '../data/siteData';
@@ -18,22 +18,28 @@ const coreNodes = [
 
 function RepairCore3D() {
   const stageRef = useRef(null);
+  const pointerRafRef = useRef(0);
+  const reduceMotion = useReducedMotion();
 
   const handlePointerMove = (event) => {
     const stage = stageRef.current;
-    if (!stage || window.matchMedia('(pointer: coarse)').matches) return;
-
-    const rect = stage.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width;
-    const y = (event.clientY - rect.top) / rect.height;
-
-    stage.style.setProperty('--rx', `${((0.5 - y) * 5).toFixed(2)}deg`);
-    stage.style.setProperty('--ry', `${((x - 0.5) * 7).toFixed(2)}deg`);
-    stage.style.setProperty('--px', `${((x - 0.5) * 16).toFixed(1)}px`);
-    stage.style.setProperty('--py', `${((y - 0.5) * 12).toFixed(1)}px`);
+    if (!stage || reduceMotion || window.matchMedia('(pointer: coarse)').matches) return;
+    const clientX = event.clientX;
+    const clientY = event.clientY;
+    if (pointerRafRef.current) cancelAnimationFrame(pointerRafRef.current);
+    pointerRafRef.current = requestAnimationFrame(() => {
+      const rect = stage.getBoundingClientRect();
+      const x = (clientX - rect.left) / rect.width;
+      const y = (clientY - rect.top) / rect.height;
+      stage.style.setProperty('--rx', `${((0.5 - y) * 5).toFixed(2)}deg`);
+      stage.style.setProperty('--ry', `${((x - 0.5) * 7).toFixed(2)}deg`);
+      stage.style.setProperty('--px', `${((x - 0.5) * 16).toFixed(1)}px`);
+      stage.style.setProperty('--py', `${((y - 0.5) * 12).toFixed(1)}px`);
+    });
   };
 
   const handlePointerLeave = () => {
+    if (pointerRafRef.current) cancelAnimationFrame(pointerRafRef.current);
     const stage = stageRef.current;
     if (!stage) return;
     stage.style.setProperty('--rx', '0deg');
@@ -45,9 +51,9 @@ function RepairCore3D() {
   return (
     <motion.div
       className={styles.coreShell}
-      initial={{ opacity: 0, scale: .96, x: 24 }}
+      initial={reduceMotion ? false : { opacity: 0, scale: .975, x: 18 }}
       animate={{ opacity: 1, scale: 1, x: 0 }}
-      transition={{ duration: .85, delay: .12, ease: [.22, 1, .36, 1] }}
+      transition={{ duration: reduceMotion ? 0 : .52, delay: reduceMotion ? 0 : .08, ease: [.22, 1, .36, 1] }}
     >
       <div className={styles.coreHeader}>
         <div>
@@ -73,13 +79,13 @@ function RepairCore3D() {
         <div className={styles.coreDeviceAnchor}>
           <motion.div
             className={styles.coreDevice}
-            animate={{ y: [-7, 7], rotateZ: [-1, 1] }}
-            transition={{ duration: 6, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
+            animate={reduceMotion ? undefined : { y: [-5, 5], rotateZ: [-.8, .8] }}
+            transition={reduceMotion ? undefined : { duration: 7, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
           >
           <div className={styles.deviceFrame}>
             <div className={styles.deviceSpeaker} />
             <div className={styles.deviceScreen}>
-              <img src={workshopImg} alt="iHub professional repair workshop" />
+              <img src={workshopImg} alt="iHub professional repair workshop" width="800" height="600" loading="lazy" decoding="async" />
               <div className={styles.deviceShade} />
               <div className={styles.deviceSweep} aria-hidden="true" />
               <div className={styles.deviceCopy}>
@@ -100,9 +106,9 @@ function RepairCore3D() {
             <motion.article
               key={title}
               className={`${styles.coreNode} ${styles[`node${index + 1}`]}`}
-              animate={{ y: index % 2 === 0 ? [-4, 4] : [4, -4] }}
-              transition={{
-                duration: 4.8 + index * .35,
+              animate={reduceMotion ? undefined : { y: index % 2 === 0 ? [-3, 3] : [3, -3] }}
+              transition={reduceMotion ? undefined : {
+                duration: 5.6 + index * .4,
                 repeat: Infinity,
                 repeatType: 'mirror',
                 ease: 'easeInOut',

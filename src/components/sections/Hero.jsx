@@ -72,6 +72,7 @@ function StackedRepairShowcase() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const stageRef = useRef(null);
+  const pointerFrameRef = useRef(0);
 
   useEffect(() => {
     if (paused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
@@ -84,17 +85,24 @@ function StackedRepairShowcase() {
 
   const handlePointerMove = (event) => {
     const stage = stageRef.current;
-    if (!stage || window.matchMedia('(pointer: coarse)').matches) return;
-    const rect = stage.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width;
-    const y = (event.clientY - rect.top) / rect.height;
-    stage.style.setProperty('--fan-rx', `${((0.5 - y) * 2.4).toFixed(2)}deg`);
-    stage.style.setProperty('--fan-ry', `${((x - 0.5) * 3.4).toFixed(2)}deg`);
-    stage.style.setProperty('--glow-x', `${(x * 100).toFixed(1)}%`);
-    stage.style.setProperty('--glow-y', `${(y * 100).toFixed(1)}%`);
+    if (!stage || window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (pointerFrameRef.current) cancelAnimationFrame(pointerFrameRef.current);
+    const clientX = event.clientX;
+    const clientY = event.clientY;
+    pointerFrameRef.current = requestAnimationFrame(() => {
+      const rect = stage.getBoundingClientRect();
+      const x = (clientX - rect.left) / rect.width;
+      const y = (clientY - rect.top) / rect.height;
+      stage.style.setProperty('--fan-rx', `${((0.5 - y) * 2.4).toFixed(2)}deg`);
+      stage.style.setProperty('--fan-ry', `${((x - 0.5) * 3.4).toFixed(2)}deg`);
+      stage.style.setProperty('--glow-x', `${(x * 100).toFixed(1)}%`);
+      stage.style.setProperty('--glow-y', `${(y * 100).toFixed(1)}%`);
+    });
   };
 
   const resetPerspective = () => {
+    if (pointerFrameRef.current) cancelAnimationFrame(pointerFrameRef.current);
+    pointerFrameRef.current = 0;
     const stage = stageRef.current;
     if (!stage) return;
     stage.style.setProperty('--fan-rx', '0deg');
@@ -136,7 +144,7 @@ function StackedRepairShowcase() {
               aria-hidden={!activeCard}
             >
               <div className={styles.cardImage}>
-                <img src={card.src} alt={`${card.title} at iHub repair lab`} />
+                <img src={card.src} alt={`${card.title} at iHub repair lab`} loading={index < 2 ? 'eager' : 'lazy'} decoding="async" fetchPriority={index === 0 ? 'high' : 'auto'} />
                 <div className={styles.cardShade} />
                 <div className={styles.cardShine} aria-hidden="true" />
               </div>

@@ -6,7 +6,7 @@ import Icon from '../components/ui/Icon';
 import styles from './Contact.module.css';
 
 export default function Contact(){
-  const location=CONTACT_ITEMS.find(i=>i.label==='Store Location'); const mapSrc='https://www.google.com/maps?q=8.1818771,77.4292565&output=embed';
+  const location=CONTACT_ITEMS.find(i=>i.label==='Store Location'); const mapSrc='https://www.google.com/maps?q=8.147980690002441,77.41068267822266&z=17&hl=en&output=embed';
   return <>
     <section style={{padding:'72px 0 40px',textAlign:'center'}}><div className="container"><motion.div initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:.6}}><span className="tag">Get in touch</span><h1 style={{fontSize:'clamp(2.7rem,5.5vw,5rem)',marginTop:16}}>Contact <span className="brand-text">iHub Nagercoil</span></h1><p style={{maxWidth:600,margin:'16px auto 0',color:'var(--fg2)',lineHeight:1.7}}>Repair quote, booking, pickup-area check, used-phone selling support or store directions. Email: ihubnagercoil@gmail.com</p></motion.div></div></section>
     <section style={{padding:'30px 0 80px'}}><div className="container"><ContactBlock formId="contact-page"/></div></section>

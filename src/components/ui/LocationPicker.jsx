@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Icon from './Icon';
 import styles from './LocationPicker.module.css';
 
-const DEFAULT_CENTER = { lat: 8.1818771, lng: 77.4292565 };
+const DEFAULT_CENTER = { lat: 8.147980690002441, lng: 77.41068267822266 };
 const LEAFLET_VERSION = '1.9.4';
 const LEAFLET_JS = `https://unpkg.com/leaflet@${LEAFLET_VERSION}/dist/leaflet.js`;
 const LEAFLET_CSS = `https://unpkg.com/leaflet@${LEAFLET_VERSION}/dist/leaflet.css`;
@@ -76,14 +76,54 @@ export default function LocationPicker({ value = '', onChange, label = 'Pickup l
   const [message, setMessage] = useState('');
   const [coords, setCoords] = useState(() => parseGoogleMapsLink(value) || DEFAULT_CENTER);
   const mapElementRef = useRef(null);
+  const modalRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
+  const openerRef = useRef(null);
+  const closeButtonRef = useRef(null);
+
+  const openPicker = () => {
+    openerRef.current = document.activeElement;
+    setOpen(true);
+  };
+
+  const closePicker = () => {
+    setOpen(false);
+    window.setTimeout(() => openerRef.current?.focus?.({ preventScroll: true }), 0);
+  };
 
   useEffect(() => {
     if (!open) return undefined;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = previousOverflow; };
+    const focusTimer = window.setTimeout(() => closeButtonRef.current?.focus(), 30);
+    const onKeyDown = event => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closePicker();
+        return;
+      }
+      if (event.key !== 'Tab' || !modalRef.current) return;
+      const focusable = Array.from(modalRef.current.querySelectorAll(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )).filter(node => node.getAttribute('aria-hidden') !== 'true');
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
   }, [open]);
 
   useEffect(() => {
@@ -177,7 +217,7 @@ export default function LocationPicker({ value = '', onChange, label = 'Pickup l
 
   const confirm = () => {
     onChange?.(toGoogleMapsLink(coords));
-    setOpen(false);
+    closePicker();
   };
 
   return (
@@ -185,13 +225,13 @@ export default function LocationPicker({ value = '', onChange, label = 'Pickup l
       <div className={styles.field}>
         <span>{label}</span>
         <div className={styles.locationInputWrap}>
-          <button type="button" className={styles.locationInput} onClick={() => setOpen(true)}>
+          <button type="button" className={styles.locationInput} onClick={openPicker} aria-haspopup="dialog" aria-expanded={open}>
             <Icon name="pin" size={18} />
             <span className={value ? styles.locationValue : styles.locationPlaceholder}>
               {value || 'Choose current location on map'}
             </span>
           </button>
-          <button type="button" className={styles.mapButton} onClick={() => setOpen(true)} aria-label="Choose pickup location on map">
+          <button type="button" className={styles.mapButton} onClick={openPicker} aria-label="Choose pickup location on map" aria-haspopup="dialog" aria-expanded={open}>
             <Icon name="pin" size={19} />
           </button>
         </div>
@@ -200,18 +240,18 @@ export default function LocationPicker({ value = '', onChange, label = 'Pickup l
 
       {open && (
         <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label="Choose pickup location">
-          <div className={styles.modal}>
+          <div ref={modalRef} className={styles.modal}>
             <div className={styles.modalHead}>
               <div>
                 <span>Pickup location</span>
                 <h3>Place the red pin</h3>
                 <p>We start from your current location. Drag the pin or tap anywhere on the map to adjust it.</p>
               </div>
-              <button type="button" className={styles.close} onClick={() => setOpen(false)} aria-label="Close location picker">×</button>
+              <button type="button" ref={closeButtonRef} className={styles.close} onClick={closePicker} aria-label="Close location picker">×</button>
             </div>
 
             <div className={styles.mapShell}>
-              <div ref={mapElementRef} className={styles.map} />
+              <div ref={mapElementRef} className={styles.map} role="application" aria-label="Interactive pickup location map. Drag the marker or tap the map to choose a location." />
               {loading && <div className={styles.mapLoading}><div className={styles.spinner} /><strong>Opening map…</strong></div>}
               <button type="button" className={styles.currentButton} onClick={recenter}><Icon name="target" size={17} />Use My Current Location</button>
             </div>
@@ -223,7 +263,7 @@ export default function LocationPicker({ value = '', onChange, label = 'Pickup l
             <p className={styles.message}>{message}</p>
 
             <div className={styles.actions}>
-              <button type="button" className="btn-secondary" onClick={() => setOpen(false)}>Cancel</button>
+              <button type="button" className="btn-secondary" onClick={closePicker}>Cancel</button>
               <button type="button" className="btn-primary brand-grad" onClick={confirm}><Icon name="check" size={17} />Use This Location</button>
             </div>
           </div>

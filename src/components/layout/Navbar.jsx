@@ -21,7 +21,7 @@ export default function Navbar(){
   const active=(to)=>to==='/'?location.pathname==='/':location.pathname.startsWith(to);
   return <>
     <header className={`${styles.navbar} ${scrolled?styles.scrolled:''}`}><div className={`container ${styles.inner}`}>
-      <Link to="/" className={styles.logo}><img src={logoImg} alt="iHub Nagercoil" className={styles.logoImg}/></Link>
+      <Link to="/" className={styles.logo}><img src={logoImg} alt="iHub Nagercoil" className={styles.logoImg} width="600" height="229" fetchPriority="high" decoding="async"/></Link>
       <nav className={styles.links}>{NAV_LINKS.map(l=><Link key={l.to} to={l.to} className={`${styles.link} ${active(l.to)?styles.active:''} ${l.accent?styles.accentLink:''}`}>{l.label}</Link>)}</nav>
       <Link to="/pickup-delivery#book-repair" className={`${styles.cta} brand-grad`}><Icon name="calendar" size={16}/>Book Repair</Link>
       <button className={styles.hamburger} onClick={()=>setMenuOpen(v=>!v)} aria-label="Open navigation" aria-expanded={menuOpen}><span className={menuOpen?styles.barOpen:''}/><span className={menuOpen?styles.barOpen:''}/><span className={menuOpen?styles.barOpen:''}/></button>

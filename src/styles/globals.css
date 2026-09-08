@@ -34,6 +34,8 @@ body {
     radial-gradient(ellipse at top, rgba(245,130,32,.10) 0%, transparent 55%),
     radial-gradient(ellipse at bottom, rgba(245,130,32,.05) 0%, transparent 60%);
   background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 /* ─── INTERACTION CURSORS ─── */
@@ -52,8 +54,16 @@ h1, h2, h3, h4 {
 }
 ::selection { background: var(--brand); color: #0e0c0a; }
 a { text-decoration: none; color: inherit; }
+.skip-link {
+  position: fixed; top: 10px; left: 10px; z-index: 10000;
+  padding: 10px 14px; border-radius: 8px;
+  background: var(--brand); color: #0e0c0a; font-weight: 800;
+  transform: translateY(-150%); transition: transform .18s ease;
+}
+.skip-link:focus { transform: translateY(0); }
 img { display: block; max-width: 100%; }
 button { font-family: inherit; cursor: pointer; border: none; }
+button, a { -webkit-tap-highlight-color: transparent; }
 
 /* ─── SCROLLBAR ─── */
 ::-webkit-scrollbar { width: 4px; }
@@ -108,6 +118,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   padding: 14px 28px; font-size: .875rem; font-weight: 700;
   letter-spacing: .08em; text-transform: uppercase;
   color: #0e0c0a; border-radius: 4px;
+  min-height: 44px;
   transition: transform .2s, box-shadow .2s; cursor: pointer;
 }
 .btn-primary:hover { transform: scale(1.04); box-shadow: 0 16px 40px -10px var(--brandglow); }
@@ -118,6 +129,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   border: 1px solid var(--border2); background: rgba(245,130,32,.06);
   color: var(--fg); border-radius: 4px;
   backdrop-filter: blur(8px);
+  min-height: 44px;
   transition: border-color .2s, background .2s; cursor: pointer;
 }
 .btn-secondary:hover { border-color: var(--brand); background: rgba(245,130,32,.12); }
@@ -139,7 +151,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   backdrop-filter: blur(12px);
   transition: border-color .3s, transform .45s cubic-bezier(.22,1,.36,1), box-shadow .45s;
   transform-style: preserve-3d;
-  will-change: transform;
+  will-change: auto;
 }
 .card-3d:hover {
   border-color: var(--border2);
@@ -151,4 +163,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 :focus-visible{outline:2px solid var(--brand);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 
+@media(max-width:1024px){body{background-attachment:scroll}}
+@media(pointer:coarse){.card-3d{transform:none!important;will-change:auto}.btn-primary:hover{transform:none}}
 @media(max-width:768px){body{padding-bottom:calc(74px + env(safe-area-inset-bottom))}.wa-fab{display:none!important}}

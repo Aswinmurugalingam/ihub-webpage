@@ -280,7 +280,7 @@
     filter .65s ease,
     box-shadow .45s ease,
     border-color .45s ease;
-  will-change: left, transform, width, height;
+  will-change: auto;
 }
 
 .repairCard:hover {
@@ -566,6 +566,13 @@
   .posRightFar { left: 102%; }
   .cardContent { left: 7%; right: 7%; bottom: 6%; }
   .cardContent p { max-width: 100%; }
+}
+
+
+@media (max-width: 760px) {
+  .orb1 { filter: blur(110px); }
+  .orb2 { filter: blur(88px); }
+  .cardShine { animation-duration: 11s; }
 }
 
 @media (max-width: 620px) {

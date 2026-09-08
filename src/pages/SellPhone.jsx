@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { flushSync } from 'react-dom';
 import Icon from '../components/ui/Icon';
 import ScrollReveal from '../components/ui/ScrollReveal';
@@ -7,7 +7,7 @@ import LocationPicker from '../components/ui/LocationPicker';
 import SuccessModal from '../components/ui/SuccessModal';
 import { createSellRequest, makeReference } from '../services/backend';
 import { BRAND_OPTIONS, getBrandModels, searchPhoneModels } from '../data/phoneCatalog';
-import sellPhoneHandover from '../assets/sell-phone-handover.png';
+import sellPhoneHandover from '../assets/sell-phone-handover.webp';
 import styles from './SellPhone.module.css';
 
 const STORAGE = ['32 GB', '64 GB', '128 GB', '256 GB', '512 GB', '1 TB', 'Other'];
@@ -41,22 +41,27 @@ function initialForm() {
 }
 
 function HeroVisual() {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
       className={styles.heroVisual}
-      initial={{ opacity: 0, x: 28, scale: .965 }}
+      initial={reduceMotion ? false : { opacity: 0, x: 22, scale: .975 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      transition={{ duration: .8, delay: .16, ease: [.22, 1, .36, 1] }}
+      transition={{ duration: reduceMotion ? 0 : .52, delay: reduceMotion ? 0 : .08, ease: [.22, 1, .36, 1] }}
     >
       <div className={styles.heroVisualGlow} aria-hidden="true" />
       <motion.div
         className={styles.handoverImageCard}
-        animate={{ y: [-5, 5], rotateX: [0.7, -0.7], rotateY: [-0.9, 0.9] }}
-        transition={{ duration: 7, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
+        animate={reduceMotion ? undefined : { y: [-4, 4], rotateX: [.55, -.55], rotateY: [-.7, .7] }}
+        transition={reduceMotion ? undefined : { duration: 8, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
       >
         <img
           src={sellPhoneHandover}
           alt="Customer handing a used phone to an iHub staff member for inspection and sale"
+          width="1448"
+          height="1086"
+          fetchPriority="high"
+          decoding="async"
         />
         <div className={styles.imageEdgeGlow} aria-hidden="true" />
         <div className={styles.imageShine} aria-hidden="true" />
@@ -287,7 +292,7 @@ export default function SellPhone() {
 
   const handlePhoto = async (slot, file) => {
     if (!file) return;
-    if (!file.type.startsWith('image/')) { setError('Please choose an image file.'); return; }
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { setError('Please choose a JPG, PNG or WEBP image.'); return; }
     if (file.size > 8 * 1024 * 1024) { setError('Each photo must be smaller than 8 MB.'); return; }
 
     setError('');

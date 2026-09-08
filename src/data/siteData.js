@@ -184,7 +184,7 @@ export const WHY_US = [
 
 // ─── CONTACT ───
 export const CONTACT_ITEMS = [
-  { icon: '📍', label: 'Store Location', value: 'Near Tea Park, Yesudhasan Complex, Vepamoodu Junction, Nagercoil', href: 'https://maps.app.goo.gl/fe5WVnTVRojT163x6', external: true },
+  { icon: '📍', label: 'Store Location', value: 'Karthikaivadali', href: 'https://google.com/maps?q=8.147980690002441,77.41068267822266&z=17&hl=en', external: true },
   { icon: '📞', label: 'Call Us', value: '+91 90257 90266', href: 'tel:+919025790266', external: false },
   { icon: '💬', label: 'WhatsApp', value: '+91 90257 90266', href: 'https://wa.me/919025790266?text=Hi%2C%20I%20need%20a%20repair%20quote', external: true },
   { icon: '📧', label: 'Email', value: 'ihubnagercoil@gmail.com', href: 'mailto:ihubnagercoil@gmail.com', external: false },

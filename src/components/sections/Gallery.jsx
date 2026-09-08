@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import ScrollReveal from '../ui/ScrollReveal';
 import Icon from '../ui/Icon';
 import { GALLERY_ITEMS } from '../../data/siteData';
@@ -19,10 +19,12 @@ export default function Gallery() {
   const dragState = useRef({ active: false, startX: 0, startScroll: 0, didDrag: false });
   const [dragging, setDragging] = useState(false);
   const [hasAppeared, setHasAppeared] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const el = outerRef.current;
     if (!el) return undefined;
+    if (reduceMotion) { setHasAppeared(true); return undefined; }
     const obs = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setHasAppeared(true);
@@ -31,7 +33,7 @@ export default function Gallery() {
     }, { threshold: 0.1 });
     obs.observe(el);
     return () => obs.disconnect();
-  }, []);
+  }, [reduceMotion]);
 
   const scrollGallery = (direction) => {
     const el = outerRef.current;
@@ -113,22 +115,22 @@ export default function Gallery() {
                 <motion.article
                   key={g.label}
                   className={styles.frame}
-                  initial={{ opacity: 0, x: 45, scale: 0.9 }}
+                  initial={reduceMotion ? false : { opacity: 0, x: 30, scale: .94 }}
                   animate={hasAppeared
-                    ? { opacity: 1, x: 0, y: yVal, rotate: g.rot, scale: 1 }
-                    : { opacity: 0, x: 45, scale: 0.9 }}
+                    ? { opacity: 1, x: 0, y: reduceMotion ? 0 : yVal, rotate: reduceMotion ? 0 : g.rot, scale: 1 }
+                    : { opacity: 0, x: 30, scale: .94 }}
                   transition={{
-                    duration: 0.72,
-                    delay: i * 0.055,
+                    duration: reduceMotion ? 0 : .5,
+                    delay: reduceMotion ? 0 : i * .04,
                     ease: [0.22, 1, 0.36, 1],
                   }}
-                  whileHover={{
-                    scale: 1.035,
-                    y: yVal - 7,
-                    transition: { duration: 0.28 },
+                  whileHover={reduceMotion ? undefined : {
+                    scale: 1.025,
+                    y: yVal - 5,
+                    transition: { duration: .22 },
                   }}
                 >
-                  <img src={IMGS[i % IMGS.length]} alt={g.label} loading={i < 5 ? 'eager' : 'lazy'} draggable="false" />
+                  <img src={IMGS[i % IMGS.length]} alt={g.label} loading="lazy" decoding="async" draggable="false" />
                   <div className={styles.frameGradient} />
                   <div className={styles.frameLabel}>{g.label}</div>
                 </motion.article>

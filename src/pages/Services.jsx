@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ServicesGrid from '../components/sections/ServicesGrid';
 import { CtaBanner } from '../components/sections/Sections';
@@ -14,12 +14,13 @@ const servicePods = [
 ];
 
 function RepairLabDeck() {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
       className={styles.labStage}
-      initial={{ opacity: 0, scale: .94, x: 28 }}
+      initial={reduceMotion ? false : { opacity: 0, scale: .97, x: 18 }}
       animate={{ opacity: 1, scale: 1, x: 0 }}
-      transition={{ duration: .85, delay: .12, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: reduceMotion ? 0 : .52, delay: reduceMotion ? 0 : .08, ease: [0.22, 1, 0.36, 1] }}
       role="img"
       aria-label="3D iHub multi-device repair service deck"
     >
@@ -31,8 +32,8 @@ function RepairLabDeck() {
 
       <motion.div
         className={styles.laptopDevice}
-        animate={{ y: [0, -7, 0], rotateZ: [-4, -3, -4] }}
-        transition={{ duration: 7.2, repeat: Infinity, ease: 'easeInOut' }}
+        animate={reduceMotion ? undefined : { y: [0, -5, 0], rotateZ: [-4, -3.2, -4] }}
+        transition={reduceMotion ? undefined : { duration: 8, repeat: Infinity, ease: 'easeInOut' }}
       >
         <div className={styles.laptopScreen}>
           <span>MACBOOK / LAPTOP</span>
@@ -44,8 +45,8 @@ function RepairLabDeck() {
 
       <motion.div
         className={styles.tabletDevice}
-        animate={{ y: [5, -5, 5], rotateZ: [6, 5, 6] }}
-        transition={{ duration: 6.6, repeat: Infinity, ease: 'easeInOut' }}
+        animate={reduceMotion ? undefined : { y: [4, -4, 4], rotateZ: [6, 5.2, 6] }}
+        transition={reduceMotion ? undefined : { duration: 7.6, repeat: Infinity, ease: 'easeInOut' }}
       >
         <div className={styles.tabletCamera} />
         <Icon name="tablet" size={42} />
@@ -54,8 +55,8 @@ function RepairLabDeck() {
 
       <motion.div
         className={styles.phoneDevice}
-        animate={{ y: [-8, 8, -8], rotateY: [-4, 4, -4] }}
-        transition={{ duration: 6.2, repeat: Infinity, ease: 'easeInOut' }}
+        animate={reduceMotion ? undefined : { y: [-6, 6, -6], rotateY: [-3, 3, -3] }}
+        transition={reduceMotion ? undefined : { duration: 7.2, repeat: Infinity, ease: 'easeInOut' }}
       >
         <div className={styles.phoneNotch} />
         <div className={styles.phoneDisplay}>
@@ -75,8 +76,8 @@ function RepairLabDeck() {
         <motion.div
           key={label}
           className={`${styles.servicePod} ${styles[`pod${index}`]}`}
-          animate={{ y: index % 2 ? [6, -6, 6] : [-6, 6, -6] }}
-          transition={{ duration: 4.8 + index * .45, repeat: Infinity, ease: 'easeInOut', delay: index * .18 }}
+          animate={reduceMotion ? undefined : { y: index % 2 ? [4, -4, 4] : [-4, 4, -4] }}
+          transition={reduceMotion ? undefined : { duration: 5.8 + index * .45, repeat: Infinity, ease: 'easeInOut', delay: index * .18 }}
         >
           <div className={styles.podIcon}><Icon name={icon} size={18}/></div>
           <div><span>REPAIR</span><strong>{label}</strong></div>
