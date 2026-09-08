@@ -103,7 +103,19 @@ function SiteShell() {
 }
 
 export default function App() {
-  const [splashDone, setSplashDone] = useState(hasSeenSplashThisSession);
+  // Read the session flag once at boot. If the normal first-visit splash has already
+  // been completed, a hard browser refresh uses the same short PageLoader shown on
+  // route changes instead of briefly exposing the page while React/lazy chunks mount.
+  const splashSeenAtBoot = useRef(hasSeenSplashThisSession()).current;
+  const [splashDone, setSplashDone] = useState(splashSeenAtBoot);
+  const [refreshLoading, setRefreshLoading] = useState(splashSeenAtBoot);
+
+  useEffect(() => {
+    if (!splashSeenAtBoot) return undefined;
+    const timer = window.setTimeout(() => setRefreshLoading(false), 360);
+    return () => window.clearTimeout(timer);
+  }, [splashSeenAtBoot]);
+
   const handleSplashDone = useCallback(() => {
     try { window.sessionStorage.setItem(SPLASH_SESSION_KEY, '1'); } catch { /* session storage is optional */ }
     setSplashDone(true);
@@ -112,6 +124,7 @@ export default function App() {
   return <MotionConfig reducedMotion="user">
     {/* The site mounts immediately so lazy chunks and hero assets load behind the short first-visit splash. */}
     <BrowserRouter><SiteShell /></BrowserRouter>
+    <AnimatePresence>{refreshLoading && <PageLoader key="refresh-page-loader" />}</AnimatePresence>
     <AnimatePresence>{!splashDone && <SplashScreen key="splash" onDone={handleSplashDone} />}</AnimatePresence>
   </MotionConfig>;
 }

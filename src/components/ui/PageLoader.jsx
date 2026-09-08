@@ -1,10 +1,11 @@
+import { createPortal } from 'react-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import markImg from '../../assets/mark.png';
 
 export default function PageLoader() {
   const reduceMotion = useReducedMotion();
 
-  return (
+  const overlay = (
     <motion.div
       initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
@@ -12,12 +13,18 @@ export default function PageLoader() {
       transition={{ duration: reduceMotion ? 0 : .22 }}
       role="status"
       aria-label="Loading page"
+      data-page-loader="true"
       style={{
-        position: 'fixed', inset: 0, zIndex: 500,
+        position: 'fixed',
+        inset: 0,
+        zIndex: 2147483000,
         background: '#0e0c0a',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
         gap: 16,
+        isolation: 'isolate',
       }}
     >
       <motion.img
@@ -41,4 +48,11 @@ export default function PageLoader() {
       />
     </motion.div>
   );
+
+  // Suspense can render this loader from inside an animated/transformed route wrapper.
+  // A transformed ancestor changes the containing block for position:fixed, which can
+  // make the loader appear below the fixed header. Portalling to document.body keeps
+  // the loader truly viewport-fixed in both local and production builds.
+  if (typeof document === 'undefined' || !document.body) return overlay;
+  return createPortal(overlay, document.body);
 }

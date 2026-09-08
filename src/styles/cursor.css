@@ -1,0 +1,27 @@
+/* iHub branded desktop cursor.
+   Touch/coarse-pointer devices keep their native behavior.
+   The click hotspot is the upper-left visible corner of the orange cone,
+   so the cursor behaves more like a normal pointer when selecting buttons/links. */
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body,
+  #root {
+    cursor: url('/ihub-cone-cursor.png') 3 2, default;
+  }
+
+  a,
+  button,
+  select,
+  summary,
+  label,
+  [role='button'],
+  [role='link'] {
+    cursor: url('/ihub-cone-cursor.png') 3 2, pointer !important;
+  }
+
+  input,
+  textarea,
+  [contenteditable='true'] {
+    cursor: text !important;
+  }
+}
